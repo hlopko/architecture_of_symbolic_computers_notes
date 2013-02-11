@@ -82,6 +82,7 @@ To clarify a little bit more:
 3. free variables of `(AB)` are union of free variables of `A` and `B`
 
 Examples:
+
 	(->x|x)		#has no free variables
 	(->x|xy)	#has one free variable - y 
 	(->x|xx)x	#has one free variable - x !but only last instance!
