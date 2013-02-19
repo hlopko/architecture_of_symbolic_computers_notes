@@ -58,4 +58,76 @@ A ***proof*** is sequence of wffs `a1...an` such taht eack `ak` is either an
 axiom or direct consequence of some subset of the prior `aj`.
 
 A ***theorem*** is a wff `a` which is a member of some proof sequence, usually
-as the last wff. The notation Γ 
+as the last wff. The notation `Γ⊢ a` indicates that `a` is a theorem in the
+system of logic under discussion (with Γ standing for the input set of axioms
+specified by the logic program).
+
+## Properties of Inference Rules ##
+
+A set of inference rules which does not infer a theorem which is not in the
+overall true set, is called ***sound***. On the other hand, we want the
+inference rules to permit proofs for all true wffs that are derivable from te
+axioms - such set is called ***complete***.
+
+Slight variations of the theorem concept will also be of interest, for example
+to find out if some wff would be true if we added some set of wffs. These are
+called ***hypothesis, premissses***. If a proof sequence exists which includes
+members of hypotheses  as axioms, then this sequence is called ***deduction***
+and is noted `Γ, Y⊢ a`. It is roughly equivalent to `Γ⊢ (if Y then a)`
+
+A ***consistent*** set of wffs does not permit derivation of contradiction. In
+most cases this is important property of an axiom set and one the logic
+programmer must strive to achieve.
+
+## Decision Procedures ##
+
+Finding inferences and proof sequences is an important part of logic-based
+computing. The programmer specifies a set of axioms and then asks questions
+about other wffs and their validity. The system will then try various
+combinations of inference rules in an attempt to find a proof sequence. We
+would like some guarantees that the questions we ask are answerable in finite
+time. We also expect that the search will be more efficient than trying all
+possible combinations technique, which is called ***exhaustive search*** or
+***British Museum search***.
+
+There are systems which are ***undecidable***, there is no algorithmic approach
+for determining whether a particular wff is true or false. 
+
+## Interpretations ##
+
+Another key part of the semantics of a logic expression is the specification of
+an ***interpretation*** that maps a meaning to each symbol. This starts with
+a ***domain*** that defines the set of possible values or objects to be dealt
+with. Functions are assigned definitions (mappings) from some domains to
+others.  Symbols used as predicates map into tests on relations over these
+domains. 
+
+The key point here is that there is often an infinite number of interpretations
+and combinations of interpretations which can be given the symbols used in wff
+or set of wffs. The prime definition is that a wff is ***true under an
+interpretation*** if the result of ***evaluating*** the wff under the
+interpretation is true. The specified interpretation ***satisfies*** the wff.
+
+![A satisfying interpretation](13_06_satisfying_interpretation.jpg)
+
+We say that two wffs are ***equivalent*** if they evaluate to the same
+true/false values for every possible interpretations.
+
+## The Deduction Theorem ##
+
+The above definitions lead to a very important result called the ***deductioin
+theorem***, which will drive many of the inference engines. 
+
+The wff `G` is a logical consequence of the wffs `A1...An` if and only if the
+wff:
+
+	if (A1 ∧ A2 ... ∧ An) then G
+
+is valid (i.e. a tautology). 
+
+The second form of the theorem states that the wff `G` is a logical
+consequence of the wffs `A1...An` if and only if the wff
+
+	A1 ∧ A2 ... ∧ An ∧ ¬ G
+
+is unsatisfiable.
