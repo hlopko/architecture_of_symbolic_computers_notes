@@ -1,6 +1,6 @@
 # Lambda Calculus #
 
-*in code examples symbols `->` represent &lambda;*
+*in code examples symbols `λ` represent λ*
 
 Lambda calculus is a mathematical language for describing arbitrary
 *expressions* built from the application of functions to other expressions.
@@ -8,7 +8,7 @@ It is as powerful as any other notations for describing algorithms, including
 any programming language.
 
 
-Main operation of &lambda; - calculus is the application of one subexpression
+Main operation of λ - calculus is the application of one subexpression
 (function) to another (its single argument) by substitution of the argument into
 the function's body. **Currying** is the normal mode of execution.
 
@@ -19,27 +19,27 @@ the function's body. **Currying** is the normal mode of execution.
 ## Syntax ##
 
 	<identifier>  := a|b|c|d|e ...
-	<function>    := ( -><identifier>"|"<expression>)
+	<function>    := ( λ<identifier>"|"<expression>)
 	<application> := (<expression><expression>)
 	<expression>  := <identifier> | <function> | <application>
 
 Examples:
 
 	identifier:  a
-	application: ((->x|(yx))a)
-	function:    (->x|(yx))
+	application: ((λx|(yx))a)
+	function:    (λx|(yx))
 
 
 ## General Model Of Computation ##
 
-In &lambda; - Calculus, what an expression means is equivalent to what it can
+In λ - Calculus, what an expression means is equivalent to what it can
 reduce to after all function applications have been performed.
 
 Interpretative semantic model:
 
 1. find all possible application subexpressions in the expression
 2. pick one where the function is neither a simple identifier nor an
-   application expression, but a function expression of the form `(->x|E)`
+   application expression, but a function expression of the form `(λx|E)`
    where `E` is arbitrary expression
 3. assume that the expression to the right of this function is expression `A`
 4. perform the substitution `[A/x]E` - identify all free occcurences of `x` in
@@ -49,10 +49,10 @@ Interpretative semantic model:
 
 Sample computation:
 
-	((->x|(xi))((->z|((->q|q)z))h)) # applying (->x|(xi)) to ((->z|((->q|q)z))h))
-	------------------------------- # ([((->z|((->q|q)z))h)/x](->x|(xi))) 
-	(((->z|((->q|q)z))h)i)			# applying (->q|q) to z ([z/q]q)
-	(((->z|z)h)i)					# applying (->z|z) to h ([h/z]z)
+	((λx|(xi))((λz|((λq|q)z))h)) # applying (λx|(xi)) to ((λz|((λq|q)z))h))
+	------------------------------- # ([((λz|((λq|q)z))h)/x](λx|(xi))) 
+	(((λz|((λq|q)z))h)i)			# applying (λq|q) to z ([z/q]q)
+	(((λz|z)h)i)					# applying (λz|z) to h ([h/z]z)
 	(hi)
 
 
@@ -60,37 +60,37 @@ Sample computation:
 
 `(...((AB)C)...X)` is the same as `(ABC...X)`
 
-`(AB)` is the same as `AB`, therefore `(->x|(->y|(->z|M)))` is the same as `(->x|->y|->z|M)`
+`(AB)` is the same as `AB`, therefore `(λx|(λy|(λz|M)))` is the same as `(λx|λy|λz|M)`
 
-`(->x|->y|->z|M)` is the same as `(->xyz|M)`
+`(λx|λy|λz|M)` is the same as `(λxyz|M)`
 
 ## Identifiers ##
 
-An ***identifier*** is used in &lambda; - Calculus as a placeholder to indicate
+An ***identifier*** is used in λ - Calculus as a placeholder to indicate
 where in a function's definition a real argument should be substituted, when
 the function is applied. Each use of the identifier in the function body is
 called an ***instance*** of that identifier. ***Scope*** of an identifier is
 the region of the expression where instances of the identifier will always have
-the same value - in &lambda; - Calculus, the rules for scoping are the same as
+the same value - in λ - Calculus, the rules for scoping are the same as
 in conventional statically scoped languages. An instance can be ***bound*** or
 ***free*** depending on whether the identifier is in the argument list of the
 function. belongs to the current scope.
 
 To clarify a little bit more:
 1. free variables of `x` are just `x`
-2. free variables of `(->x|A)` are free variables of `A` with `x` removed
+2. free variables of `(λx|A)` are free variables of `A` with `x` removed
 3. free variables of `(AB)` are union of free variables of `A` and `B`
 
 Examples:
 
-	(->x|x)		#has no free variables
-	(->x|xy)	#has one free variable - y 
-	(->x|xx)x	#has one free variable - x !but only last instance!
+	(λx|x)		#has no free variables
+	(λx|xy)	#has one free variable - y 
+	(λx|xx)x	#has one free variable - x !but only last instance!
 
 
 ## Substitution Rules ##
 
-An expression of the form `(->x|E)A`, where `E` and `A` are arbitrary
+An expression of the form `(λx|E)A`, where `E` and `A` are arbitrary
 expressions, the evaluation of this expression involves the ***substitution***
 of the expression `A` for all appropriate *free* instances of the identifier
 `x` in the expression `E`. Any bound instances of `x` and any other instances
@@ -98,7 +98,7 @@ are left unchanged.
 
 ### Renaming Rule ###
 
-Consider an expression `(->x|(->y|B))A`. If `A` contains any free occurences of
+Consider an expression `(λx|(λy|B))A`. If `A` contains any free occurences of
 `y`, then a blind substitution into the body of the function will end up
 changing those instances of `y` in `A` from free to bound, radically changing
 the value of the expression. The solution is to change the formal parameter of
@@ -114,12 +114,12 @@ from to other via a series of reductions (`A >> B` means `A` reduces to `B`)
 * ***alpha conversion*** corresponds to simple and safe renaming of formal
   identifiers. Two expressions are the same if they differ only in symbol
   names.
-* ***beta conversion*** matches normal &lambda; - Calculus function
+* ***beta conversion*** matches normal λ - Calculus function
   applications. Two expressions are the same if one represents the result of
   performing some function application found in the other.
 * ***eta conversion*** corresponds to a simple optimization of a function
   application that occurs quite often, it is basically a special case of the
-  beta conversion: `(->x|Ex)A >> EA`
+  beta conversion: `(λx|Ex)A >> EA`
 
 When we can no longer apply beta or eta conversions, the expression is in
 ***normal order*** 
@@ -156,131 +156,131 @@ not guaranteed to stop when doing only leftmost application.
 
 Example of normal order reduction:
 
-	(->x|(->w|(->y|wyw)b))((->x|xxx)(->x|xxx))((->z|z)a)
-	(->w|(->y|wyw)b)((->z|z)a)
-	(->y|((->z|z)a)y((->z|z)a))b
-	((->z|z)a)b((->z|z)a)     #first redundant application
-	(ab((->z|z)a))			  #second redundant application
+	(λx|(λw|(λy|wyw)b))((λx|xxx)(λx|xxx))((λz|z)a)
+	(λw|(λy|wyw)b)((λz|z)a)
+	(λy|((λz|z)a)y((λz|z)a))b
+	((λz|z)a)b((λz|z)a)     #first redundant application
+	(ab((λz|z)a))			  #second redundant application
 	(aba)
 
 Example of applicative order reduction:
 
-	(->x|(->w|(->y|wyw)b))((->x|xxx)(->x|xxx))((->z|z)a)
-	#evaluation of ((->x|xxx)(->x|xxx))
-	([(->x|xxx)/x](xxx))
-	((->x|xxx)(->x|xxx)(->x|xxx))    #and will aparently continue forewer
+	(λx|(λw|(λy|wyw)b))((λx|xxx)(λx|xxx))((λz|z)a)
+	#evaluation of ((λx|xxx)(λx|xxx))
+	([(λx|xxx)/x](xxx))
+	((λx|xxx)(λx|xxx)(λx|xxx))    #and will aparently continue forewer
 
-## Basic Arithmetic in &lambda; ##
+## Basic Arithmetic in λ ##
 
 Mathematically, we have to define how integer 0 will look like, and then the
 function `s` which given an integer `k` will produce an expression for the
 integer `k+1`.
 
-Because we are using &lambda; - Calculus,  the integer 0 will be represented as a function: 
+Because we are using λ - Calculus,  the integer 0 will be represented as a function: 
 
-	0 = (->sz|z)
+	0 = (λsz|z)
 
 The definition of the successor function is:
 
-	s(x) = (->xyz|y(xyz))
+	s(x) = (λxyz|y(xyz))
 
 Some examples to hurt my brain more:
 
-	0 = (->sz|z)
-	1 = (->xyz|y(xyz))(->sz|z)
-	    (->yz|y((->sz|z)yz))
-		(->yz|yz)
-	2 = (->xyz|y(xyz))(->sz|sz)
-	    (->yz|y((->sz|sz)yz))
-		(->yz|y(yz))
-	3 = (->xyz|y(xyz))(->sz|s(sz))
-		(->yz|y((->sz|s(sz))yz))
-		(->yz|y(y(yz)))
+	0 = (λsz|z)
+	1 = (λxyz|y(xyz))(λsz|z)
+	    (λyz|y((λsz|z)yz))
+		(λyz|yz)
+	2 = (λxyz|y(xyz))(λsz|sz)
+	    (λyz|y((λsz|sz)yz))
+		(λyz|y(yz))
+	3 = (λxyz|y(xyz))(λsz|s(sz))
+		(λyz|y((λsz|s(sz))yz))
+		(λyz|y(y(yz)))
 	...
 
 ### Operations ###
 
 ***Addition***:
 
-	(->wzyx|wy(zyx))
+	(λwzyx|wy(zyx))
 
 ***Multiplication***
 
-	(->wzy|w(zy))
+	(λwzy|w(zy))
 
 Example 2 + 1:
 
-	(->wzyx|wy(zyx))(->sz|s(sz))(->sz|sz)
-	(->yx|(->sz|s(sz))y((->sz|sz)yx))
-	(->yx|y(y((->sz|sz)yx)))
-	(->yx|y(y(yx)))
+	(λwzyx|wy(zyx))(λsz|s(sz))(λsz|sz)
+	(λyx|(λsz|s(sz))y((λsz|sz)yx))
+	(λyx|y(y((λsz|sz)yx)))
+	(λyx|y(y(yx)))
 	3
 
 Example 1 * 2:
 
-	(->wzy|w(zy))(->sz|sz)(->sz|s(sz))
-	(->y|(->sz|sz)((->sz|s(sz))y))
-	(->y|(->sz|sz)(->z|y(yz)))
-	(->y|(->z|(->z|y(yz))z))
-	(->y|(->z|y(yz)))
+	(λwzy|w(zy))(λsz|sz)(λsz|s(sz))
+	(λy|(λsz|sz)((λsz|s(sz))y))
+	(λy|(λsz|sz)(λz|y(yz)))
+	(λy|(λz|(λz|y(yz))z))
+	(λy|(λz|y(yz)))
 	2
 
 Example 2 * 3
 
-	(->wzy|w(zy))(->sz|s(sz))(->sz|s(s(sz)))
-	(->y|(->sz|s(sz))((->sz|s(s(sz)))y))
-	(->y|(->sz|s(sz))(->z|y(y(yz))))
-	(->y|(->z|(->z|y(y(yz)))((->z|y(y(yz)))z)))
-	(->y|(->z|(->z|y(y(yz)))(y(y(yz)))))
-	(->y|(->z|y(y(y(y(y(yz)))))))
+	(λwzy|w(zy))(λsz|s(sz))(λsz|s(s(sz)))
+	(λy|(λsz|s(sz))((λsz|s(s(sz)))y))
+	(λy|(λsz|s(sz))(λz|y(y(yz))))
+	(λy|(λz|(λz|y(y(yz)))((λz|y(y(yz)))z)))
+	(λy|(λz|(λz|y(y(yz)))(y(y(yz)))))
+	(λy|(λz|y(y(y(y(y(yz)))))))
 	6	#uff :)
 
 
-## Boolean Operations in &lambda; - Calculus ##
+## Boolean Operations in λ - Calculus ##
 
-	true = T = (->xy|x)
-	false = F = (->xy|y)
+	true = T = (λxy|x)
+	false = F = (λxy|y)
 
 On contrary to integers, where the internal body matched our concepts of
 integers, these functions are used because of the way how they function when
 given real arguments. Consider `Q` and `R` are arbitrary expressions:
 
-	if P == T then PQR = T Q R = (->xy|x)QR = Q
-	if P == F then PQR = F Q R = (->xy|y)QR = R
+	if P == T then PQR = T Q R = (λxy|x)QR = Q
+	if P == F then PQR = F Q R = (λxy|y)QR = R
 
 Other interesting functions:
 
-	not = (->w|wFT)
-	and = (->wz|wzF)
-	or  = (->wz|wTz)
-	xor = (->wz|w(zFT)(zTF))
+	not = (λw|wFT)
+	and = (λwz|wzF)
+	or  = (λwz|wTz)
+	xor = (λwz|w(zFT)(zTF))
 
-	zero(x) = (->x|x F not F)
+	zero(x) = (λx|x F not F)
 
 Examples: 
 
-	not T = (->w|w(->xy|y)(->xy|x))(->xy|x)
-			(->xy|x)(->xy|y)(->xy|x)
-			(->xy|y)
+	not T = (λw|w(λxy|y)(λxy|x))(λxy|x)
+			(λxy|x)(λxy|y)(λxy|x)
+			(λxy|y)
 			F
 
-	and T F = (->wz|wzF)(->xy|x)(->xy|y)
-			  ((->xy|x)(->xy|y)F)
-			  (->xy|y)
+	and T F = (λwz|wzF)(λxy|x)(λxy|y)
+			  ((λxy|x)(λxy|y)F)
+			  (λxy|y)
 			  F
 
-	zero(1) = (->x|x (->xy|y) (->w|w(->xy|y)(->xy|x)) (->xy|y))(->sz|sz)
-			  ((->sz|sz) (->xy|y) (->w|w(->xy|y)(->xy|x)) (->xy|y))
-			  ((->xy|y) (->w|w(->xy|y)(->xy|x)) (->xy|y))
-			  (->xy|y)
+	zero(1) = (λx|x (λxy|y) (λw|w(λxy|y)(λxy|x)) (λxy|y))(λsz|sz)
+			  ((λsz|sz) (λxy|y) (λw|w(λxy|y)(λxy|x)) (λxy|y))
+			  ((λxy|y) (λw|w(λxy|y)(λxy|x)) (λxy|y))
+			  (λxy|y)
 			  F
 
-	zero(0) = (->x|x F not F)(->sz|z)
-			  ((->sz|z) F not F)
+	zero(0) = (λx|x F not F)(λsz|z)
+			  ((λsz|z) F not F)
 			  (not F)
 			  T
 
-## Recursion in &lambda; - Calculus ##
+## Recursion in λ - Calculus ##
 
 Consider the application `RA`, where `R` is some recursively defined function
 and `A` is some argument expression. If `A` satisfies the ***basis test*** for
@@ -290,49 +290,49 @@ Making `R` recursive has a lot to do with making it ***repeat itself***.
 
 How to do this self-repetition - try to evaluate following expression:
 
-	(->x|xx)(->x|xx)
+	(λx|xx)(λx|xx)
 
 The expression has the property that it does not change regardless of how many
 beta conversions are performed. Using this as a basis, for any lambda
 expression `R`:
 
-	((->x|R(xx))(->x|R(xx)))
-	R((->x|R(xx))(->x|R(xx)))
-	R(R((->x|R(xx))(->x|R(xx))))
-	R(R(R((->x|R(xx))(->x|R(xx)))))
+	((λx|R(xx))(λx|R(xx)))
+	R((λx|R(xx))(λx|R(xx)))
+	R(R((λx|R(xx))(λx|R(xx))))
+	R(R(R((λx|R(xx))(λx|R(xx)))))
 
 This allows us to compose an arbitrary function `R` on itself an infinite
 number of times. So to finally tell you the secret - here comes the ***Y
 combinator*** (also called fixed point combinator):
 
-	(->y|((->x|y(xx))(->x|(xx))))
+	(λy|((λx|y(xx))(λx|(xx))))
 
 What a recursion would it be without the factorial:
 
 	fact(n) = if zero(n) then 1 else n*fact(n-1)
 
-&lambda; - Calculus equivalent:
+λ - Calculus equivalent:
 
-	fact(n) = Y(->fn|zero n 1 (* n (f (- n 1))))
+	fact(n) = Y(λfn|zero n 1 (* n (f (- n 1))))
 
 fact(4):
 
-	R = (->rn|zero n 1 (* n (r (- n 1))))
+	R = (λrn|zero n 1 (* n (r (- n 1))))
 
 	fact(4)
 	Y R 4
 	R (YR) 4
-	(->n|zero n 1 (* n (YR (- n 1))))4
+	(λn|zero n 1 (* n (YR (- n 1))))4
 	zero 4 1 (* 4 (YR (- 4 1)))
 	zero 4 1 (* 4 ((YR) 3))
 	F 1 (* 4 ((YR) 3))
 	(* 4 ((YR) 3))
 	(* 4 (R (YR) 3))
-	(* 4 ((->n|zero n 1 (* n (YR (- n 1))))3))
+	(* 4 ((λn|zero n 1 (* n (YR (- n 1))))3))
 	(* 4 (zero 3 1 (* 3 (YR (- n 1)))))
 	(* 4 (* 3 ((YR) 2)))
 	(* 4 (* 3 (R (YR) 2)))
-	(* 4 (* 3 ((->n|zero n 1 (* n (YR (- n 1))))2)))
+	(* 4 (* 3 ((λn|zero n 1 (* n (YR (- n 1))))2)))
 	(* 4 (* 3 (zero 2 1 (* 2 (YR (- 2 1))))))
 	(* 4 (* 3 (* 2 (R (YR) 1))))
 	...
