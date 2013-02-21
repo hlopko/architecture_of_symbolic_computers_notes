@@ -1,9 +1,9 @@
 # The SECD Abstract Machine #
  
-SO far we have described two simple functional languages based on &lambda;
+So far we have described two simple functional languages based on &lambda;
 - Calculus: abstract programming and a prefix s-expression equivalent. The
 operations of these languages has been described in terms of interpreters for
-such languages (written in themselves) > ***denotational semantics***.
+such languages (written in themselves) - ***denotational semantics***.
 
 An alternative approach is through ***interpretative semantics***, where we
 define a simple ***abstract machine*** and combine this with a description of
@@ -672,19 +672,192 @@ argument list currently on the top of the S.
 1. Generate the SECD code for the following:
 	1. `(let (x y) (1 2) (* x y))`
 	2. `let f = (let y = 4 in (->x| y * x)) in f(3)`
-	3. `letrec f=(->n | if n then 1 else f(n - 1) + f(n - 2)) in f(3)
+	3. `letrec f=(->n | if n then 1 else f(n - 1) + f(n - 2)) in f(3)`
 	4. The towers of Hanoi
 
-2. Write an SECD program for:
+	Compilation of `(let (x y) (1 2) (* x y))`:
+
+		(NIL *2 CONS *1 CONS LDF (LD (1.2) LD (1.1) MUL RTN) AP) ->
+		(NIL LDC 2 CONS LDC 1 CONS LDF (LD (1.2) LD (1.1) MUL RTN) AP)
+
+	Compilation of `let f = (let y = 4 in (->x| y * x)) in f(3)`:
+
+		*(LET (F) ((LET (Y) (4) (lambda (x) (* y x)))) (f 3)) ->
+		(NIL *(LET (Y) (4) (lambda (x) (* y x))) CONS LDF (LDC 3 CONS LD(1.1) AP RTN) AP)->
+
+		*(LET (Y) (4) (lambda (x) (* y x))) ->
+		(NIL LDC 4 CONS LDF (*(lambda (x) (* y x)) RTN) AP)
+
+		*(lambda (x) (* y x)) ->
+		(LDF (LD (1.1) LD (2.1) MUL) RTN)
+
+		------>
+		(NIL NIL LDC 4 CONS LDF (LDF (LD (1.1) LD (2.1) MUL) RTN) AP CONS LDF (LDC 3 CONS LD(1.1) AP RTN) AP)
+
+	Compilation of `letrec f=(->n | if n then 1 else f(n - 1) + f(n - 2)) in f(3)`:
+
+		->
+		*(LETREC (f) (LAMBDA (n) (IF n 1 (+ (f (- n 1)) (f (- n 2))))) (f 3)) ->
+		(DUM NIL *(LAMBDA (n) (IF n 1 (+ (f (- n 1)) (f (- n 2)))) RTN) 
+			 CONS LDF (LDC 3 CONS LD(1.1) AP RTN) RAP)
+	
+		*(LAMBDA (n) (IF n 1 (+ (f (- n 1)) (f (- n 2)))) RTN) ->
+		(LDF (*(IF n 1 (+ (f (- n 1)) (f (- n 2)))) RTN))
+
+		*(IF n 1 (+ (f (- n 1)) (f (- n 2)))) ->
+		(LD (1.1) SEL (LDC 1) *(+ (f (- n 1)) (f (- n 2))))
+
+		*(+ (f (- n 1)) (f (- n 2))) ->
+		(NIL LDC 2 LD (1.1) SUB CONS LDF (LD (2.1) RTN) AP 
+		    NIL LDC 1 LD (1.1) SUB CONS LDF (LD (2.1) RTN) AP ADD)
+
+
+		------->
+		(DUM NIL LDF (LD (1.1) SEL 
+							   (LDC 1) 
+							   (NIL LDC 2 LD (1.1) SUB CONS LDF (LD (2.1) RTN) AP 
+								NIL LDC 1 LD (1.1) SUB CONS LDF (LD (2.1) RTN) AP ADD)
+					  RTN) 
+			 CONS LDF (LDC 3 CONS LD(2.1) AP RTN) RAP)
+
+
+	Tower of Hanoi:
+
+		toh(n) = (lambda (n) 
+					(let (l r m b) 
+						 (n 0 0 nil)
+						 (letrec (h) 
+								 (lambda (n f t o b) 
+										 (if (eq n 1)
+											 (append (cons f t) b)
+											 (h (- n 1) 
+												o 
+												t 
+												f 
+												(append (cons f t) 
+														(h (- n 1)
+														   f
+														   o
+														   t
+														   b)))))
+								 (h n l r m b)))) ->
+		(LDF (*AAAAA RTN) RTN)
+			where AAAAA = 
+					(let (l r m b) 
+						 (n 0 0 nil)
+						 (letrec (h) 
+								 (lambda (n f t o b) 
+										 (if (eq n 1)
+											 (append (cons f t) b)
+											 (h (- n 1) 
+												o 
+												t 
+												f 
+												(append (cons f t) 
+														(h (- n 1)
+														   f
+														   o
+														   t
+														   b)))))
+								 (h n l r m b))) ->
+		*AAAAA ->
+		(NIL NIL CONS LDC 0 CONS LDC 0 CONS LD (1.1) CONS LDF (*BBBBB RTN) AP)
+			where BBBBB = (letrec (h) 
+								 (lambda (n f t o b) 
+										 (if (eq n 1)
+											 (append (cons f t) b)
+											 (h (- n 1) 
+												o 
+												t 
+												f 
+												(append (cons f t) 
+														(h (- n 1)
+														   f
+														   o
+														   t
+														   b)))))
+								 (h n l r m b))
+
+		*BBBBB ->
+		(DUM NIL *CCCCC CONS LDF (LD (2.4) CONS LD (2.3) CONS LD (2.2) CONS
+			LD (2.1) CONS LD AP))
+			where CCCCC = (lambda (n f t o b) 
+							 (if (eq n 1)
+								 (append (cons f t) b)
+								 (h (- n 1) 
+									o 
+									t 
+									f 
+									(append (cons f t) 
+											(h (- n 1)
+											   f
+											   o
+											   t
+											   b)))))
+
+		*CCCCC ->
+		(LDF (*DDDDD RTN))
+			where DDDDD = (if (eq n 1)
+								 (append (cons f t) b)
+								 (h (- n 1) 
+									o 
+									t 
+									f 
+									(append (cons f t) 
+											(h (- n 1)
+											   f
+											   o
+											   t
+											   b))))
+
+		*DDDDD ->
+		(LDC 1 LD (1.1) EQ SEL 
+			(LD (1.5) ld (1.3) LD (1.2) CONS APPEND)
+			(LD (1.5) CONS LD (1.3) CONS LD (1.4) CONS LD (1.2) CONS LDC 1 LD
+				(1.1) SUB CONS LD (2.1) AP CONS LD (1.2) CONS LD (1.3) CONS 
+					LD (1.4) CONS LDC 1 LD (1.1) SUB CONS LD (2.1) AP))
+
+
+		-------->
+		(LDF (NIL NIL CONS LDC 0 CONS LDC 0 CONS LD (1.1) CONS 
+				LDF (DUM NIL 
+					LDF (LDC 1 LD (1.1) EQ SEL 
+										   (LD (1.5) ld (1.3) LD (1.2) CONS APPEND JOIN)
+										   (LD (1.5) CONS LD (1.3) CONS LD (1.4) CONS 
+										    LD (1.2) CONS LDC 1 LD (1.1) SUB CONS 
+											LD (2.1) AP CONS LD (1.2) CONS LD (1.3) CONS 
+											LD (1.4) CONS LDC 1 LD (1.1) SUB CONS 
+											LD (2.1) AP JOIN) 
+					     RTN) CONS 
+					LDF (LD (2.4) CONS LD (2.3) CONS LD (2.2) CONS
+						 LD (2.1) CONS LD AP) 
+				     RAP RTN) AP
+			  RTN) RTN)
+
+
+	Hopefully...
+
+2. If one were to implement the SECD memory model out of a conventional memory
+   with 32-bit words, how many bits could be allocated to integers, and how big
+   could the memory be (in cells) if:
+	* one memory word was one cell = `31 bits for integers, 15 bits for address`
+	* two memory words made up one cell = `63 bits for integers, 31 bits for address`
+
+3. Write an SECD program for:
 
 		append(x,y) = if atom(x)
 					  then y
 					  else car(x).append(cdr(x),y)
 
+		(LETREC (a) (lambda (x y) (if (atom x)
+									  y
+									  (cons (car x) (a (cdr x) y))))
+					a)
+
 	1. How many new memory cells are used during the compilation of `append((1
-	   2), (3 4))`?
+	   2), (3 4))`? = `2`
 	2. If you had 100 000 cells available, how big a list could you append to
-	   (3 4)?
+	   (3 4)? = `99998 if not counting those 2 used by (3 4)`
 
 
 

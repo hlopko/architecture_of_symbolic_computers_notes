@@ -332,9 +332,29 @@ If we implement such data structures as s-expressions, we find that the
 that cell or some earlier cell linked to it. This will be discussed in more
 detail for the SECD Machine.
 
-Exercises:
+## Exercises ##
 
 1. Modify subs to rename variables only when necessary.
+
+		subs(y,x,m) = if null(m)
+					  then nil
+					  elseif is-id(m)
+					  then if m = x
+						   then y
+						   else m
+					  elseif is-lambda(m)
+					  then let a = get-lambda-arg(m)
+						   and b = get-body(m)
+						   and f = free(a,y)
+						   in if a = x
+						      then m
+						      elseif f
+							  then let z = new-id()
+							       in create-function(z, subs(y,z,subs(z,y,get-body(m))))
+							  else create-function(get-arg(m), subs(y,x,get-body(m)))
+					  else create-application(subs(y,x,get-function(m)),
+											  subs(y,x,get-argument(m)))
+
 2. Assume following syntax for certain class of s-expressions:
 
         <logic-expr> := <id> | T | F
@@ -343,13 +363,43 @@ Exercises:
         			| (not <logic-expr>)
         			| (let <id> <logic-expr> <logic-expr>)
 
-  Define in abstract syntaqx a function that will evaluate such expressions,
+  Define in abstract syntax a function that will evaluate such expressions,
   assuming it is given as input an association list of all identifiers and their
-  current values. Show that it works for the expression:
+  current values. Show that it works for the expression `(let x F (let y T (and (not x) (or x y))))`:
 	
-		(let x F (let y T (and (not x) (or x y))))
+		#using assoc
+		logic-eval(e,a) =
+			if null(e)
+			then nil
+			elseif is-id(e)
+			then assoc(e,a)
+			elseif is-atom(e)
+			then e-to-boolean(e)
+			elseif is-not-expr(e)
+			then not(logic-eval(cadr(e)))
+			elseif is-and-expr(e)
+			then and(logic-eval(cadr(e),a), logic-eval(caddr(e),a))
+			elseif is-or-expr(e)
+			then or(logic-eval(cadr(e),a), logic-eval(caddr(e),a))
+			else logic-eval(cadddr(e), 
+							cons(cons(cadr(e), logic-eval(caddr(e),a)), a))
 
-3. Modify closure evaluator to handle an extension to `cond` suchthat if the
+	Evaluation of `(let x F (let y T (and (not x) (or x y))))`:
+		
+		logic-eval(*expr*, nil) ->
+		logic-eval((let y T (and (not x) (or x y))), ((x F))) ->
+		logic-eval((and (not x) (or x y)), ((y T) (x F))) ->
+		and(logic-eval((not x), ((y T) (x F))),
+		    logic-eval((or x y))) ->
+		and(not(logic-eval(x, ((y T) (x F))),
+			or(logic-eval(x, ((y T) (x F))),
+			   logic-eval(y, ((y T) (x F)))))) ->
+		and(not(F),or(F, T)) ->
+		T
+			
+
+
+3. Modify closure evaluator to handle an extension to `cond` such that if the
    last element of `cond` list has only one expression in it, and no prior
    test passes, the value of this expression is returned.  
    
@@ -357,4 +407,12 @@ Exercises:
 
 	would return 3.
 
-
+	eval-cond(a) =
+		if null(a)
+		then nil
+		elseif and(null(cdr(a)), null(cddr(a)))
+		then eval(car(a))
+		else let z = car(a)
+			 in if eval(car(z)) = T
+			    then eval(cadr(z))
+				else eval-cond(cdr(z))

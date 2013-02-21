@@ -45,9 +45,9 @@ all x, if x is human, then x has a mother.`
 
 ### Atoms, Literals, and Predicates	###
 
-***Atom*** consists of the name of a relation prefixed to a tuplne whose elements are
+***Atom*** consists of the name of a relation prefixed to a tuple whose elements are
 terms. The meaning is that under an interpretation the atom evaluates to true
-if the object specified by the tuplne is in the set defined by the relation.
+if the object specified by the tuple is in the set defined by the relation.
 
 
 ***Literal*** is an atom with an optional ¬ prefixed. 
@@ -389,11 +389,45 @@ then we must go on to the next Herbrand set.
 
 3. Transform the following into clausal form:
 
-	1. `((p ⇒ q) ∧ ¬ p) ⇒ ¬ q`
+	1. `((p ⇒ q) ∧ ¬p) ⇒ ¬q`
+
+			-> ¬((p ⇒ q) ∧ ¬p) ∨ ¬q
+			-> ¬(¬p ∨ q ∧ ¬p) ∨ ¬q
+			-> ¬(¬p) ∨ ¬q
+			-> p ∨ ¬q
+
 	2. `∃u|∃v|∀w|∀x|∃y|∀z|∃q|∀s|p(q,s,u,v,w,x,y,z)`
+
+			-> ∀w|∀x|∀z|∀s|p(g(w,x,z),s,a,b,w,x,f(w,x),z)
+
+
 	3. `∀x|(P(a,x) ⇒ ∃y|Q(a,y,x))`
+
+			-> ∀x|(¬P(a,x) ∨ ∃y|Q(a,y,x))
+			-> ∀x|∃y(¬P(a,x) ∨ Q(a,y,x))
+			-> ∀x(¬P(a,x) ∨ Q(a,f(x),x))
+
 	4. `∀x|(P(a,x) ⇒ ∃x|Q(a,y,x))`
-	5. `∃y|((∀x|(P(x) ⇒ Q(f(x),y))) ⇒ ((∃y|P(y)) ⇒ (∃x|Q(x,y))))
+
+			-> ∀x|(¬P(a,x) ∨ ∃x|Q(a,y,x))
+			-> ∀x|∃z|(¬P(a,x) ∨ Q(a,y,z))
+			-> ∀x|(¬P(a,x) ∨ Q(a,y,f(x)))
+
+	5. `∃y|((∀x|(P(x) ⇒ Q(f(x),y))) ⇒ ((∃y|P(y)) ⇒ (∃x|Q(x,y))))`
+
+			-> ∃y|((∀x|(P(x) ⇒ Q(f(x),y))) ⇒ ((∃y|P(y)) ⇒ (∃x|Q(x,y))))
+			-> ((∀x|(P(x) ⇒ Q(f(x),z))) ⇒ ((∃y|P(y)) ⇒ (∃x|Q(x,z))))
+			-> (¬(∀x|(P(x) ⇒ Q(f(x),z))) ∨ ((∃y|P(y)) ⇒ (∃x|Q(x,z))))
+			-> (¬(∀x|(¬P(x) ∨ Q(f(x),z))) ∨ (¬(∃y|P(y)) ∨ (∃x|Q(x,z))))
+			-> ((∀x|¬(¬P(x) ∨ Q(f(x),z))) ∨ (∀y|¬P(y) ∨ ∃x|Q(x,z)))
+			-> ((∀x|P(x) ∧ ¬Q(f(x),z)) ∨ (∀y|¬P(y) ∨ ∃x|Q(x,z)))
+			-> ((∀x|P(x) ∧ ¬Q(f(x),z)) ∨ ((∀y|¬P(y)) ∨ (∃x|Q(x,z))))
+			-> ((∀x|(P(x) ∧ ¬Q(f(x),z))) ∨ (∀y|∃x|¬P(y) ∨ Q(x,z)))
+			-> ((∀x|(P(x) ∧ ¬Q(f(x),z))) ∨ (∀y|∃a|¬P(y) ∨ Q(a,z)))
+			-> ∀x|((P(x) ∧ ¬Q(f(x),z))) ∨ (∀y|¬P(y) ∨ Q(g(y),z))
+			-> ∀x|∀y|(P(x) ∧ ¬Q(f(x),z)) ∨ (¬P(y) ∨ Q(g(y),z))
+			-> ∀x|∀y|(P(x) ∨ (¬P(y) ∨ Q(g(y),z))) ∧ (¬Q(f(x),z) ∨ (¬P(y) ∨ Q(g(y),z)))
+			-> ∀x|∀y|(P(x) ∨ ¬P(y) ∨ Q(g(y),z)) ∧ (¬Q(f(x),z) ∨ ¬P(y) ∨ Q(g(y),z))
 
 4. Assume that wffs in propositional logic have been converted to clausal form
    and written as s-expression lists, where each element of the topmost list
@@ -401,11 +435,31 @@ then we must go on to the next Herbrand set.
    either `<proposition>` or `(NOT <proposition>)`. For example, `(¬d ∨ e ∨ f)
    ∧ (h ∨ ¬f)` would be:
 
-		(((NOT d) e f) (h (NOt f)))
+		(((NOT d) e f) (h (NOT f)))
 
    Write an abstract function `unsat(wff, letters)`, where `letters` is a list
    of the propositional letters in the wff, which determines whether or not
    such a wff is unsatisfiable.
+
+		unsat(wff, letters) =
+			if null(letters)
+			then is-wff-false(wff)
+			else let letter = car(letters)
+			in and(is-wff-false(subs(wff, letter, T), cdr(letters)),
+				   is-wff-false(subs(wff, letter, F), cdr(letters)))
+
+			where is-wff-false(wff) =
+					not(and((apply 'or car(wff)),
+						is-wff-false(cdr(wff))))
+			and subs(wff, letter, value) = 
+					if atom(wff)
+					then if wff = letter
+						 then value
+						 else wff
+					else cons(subs(car(wff),letter,value),
+							  subs(cdr(wff),letter,value))
+
+
 
 
 

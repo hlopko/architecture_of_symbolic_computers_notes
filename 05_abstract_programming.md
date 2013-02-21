@@ -170,30 +170,44 @@ composition of the two.
 1. Write as an abstract program the predicate ***free***(x,e), which returns
    true if the identifier occurs free in e. 
 
-	FINISHME
-	free(x,e) = if null(e) 
-				then F
-				else if lambda(e) then 
-						if detect(args(e), x) 
-						then F
-						else free(x, body(e))
-					 else if application(e) 
-						  then or(free(x, first(e)),free(x, second(e)))
-						  else if atom(e)
-							   then e == x
-							   else 'unexpected situation'
+		free(x,e) = if null(e) 
+					then F
+					elseif is-id(e)
+					then if x = e
+						 then T
+						 else F
+					elseif is-lambda(e) then 
+							if get-lambda-arg(e) = x 
+							then F
+							else free(x, get-body(e))
+					else or(free(x, get-function(e)),
+							free(x, get-argument(e)))
 
 
-2. Write an abstract definition fora function ***subs***(y,x,m) where `y` and
+2. Write an abstract definition for a function ***subs***(y,x,m) where `y` and
    `m` are any valid s-expressions and x is an atom representing variable name.
    The result is s-expression equivalent to `[y/x]m`.
 
-	FINISHME
-	subs(y,x,m) = if null(m)
-				  then nil
-				  else if atom(m)
-					   then if m == x
-					        then if free(y,x)
+		subs(y,x,m) = if null(m)
+					  then nil
+					  elseif is-id(m)
+					  then if m = x
+						   then y
+						   else m
+					  elseif is-lambda(m)
+					  then let a = get-lambda-arg(m)
+						   and b = get-body(m)
+						   and f = free(a,y)
+						   in if a = x
+						      then m
+						      elseif f
+							  then let z = new-id()
+							       in create-function(z, subs(y,z,subs(z,y,get-body(m))))
+							  else create-function(get-arg(m), subs(y,x,get-body(m)))
+					  else create-application(subs(y,x,get-function(m)),
+											  subs(y,x,get-argument(m)))
+					
+						
 							     
 
 
