@@ -407,12 +407,12 @@ detail for the SECD Machine.
 
 	would return 3.
 
-	eval-cond(a) =
-		if null(a)
-		then nil
-		elseif and(null(cdr(a)), null(cddr(a)))
-		then eval(car(a))
-		else let z = car(a)
-			 in if eval(car(z)) = T
-			    then eval(cadr(z))
-				else eval-cond(cdr(z))
+		eval-cond(a) =
+			if null(a)
+			then nil
+			elseif and(null(cdr(a)), null(cadr(a)))
+			then eval(caar(a))
+			else let z = car(a)
+				 in if eval(caar(z)) = T
+					then eval(cadar(z))
+					else eval-cond(cdr(z))

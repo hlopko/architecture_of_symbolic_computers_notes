@@ -392,7 +392,7 @@ then we must go on to the next Herbrand set.
 	1. `((p ⇒ q) ∧ ¬p) ⇒ ¬q`
 
 			-> ¬((p ⇒ q) ∧ ¬p) ∨ ¬q
-			-> ¬(¬p ∨ q ∧ ¬p) ∨ ¬q
+			-> ¬((¬p ∨ q) ∧ ¬p) ∨ ¬q
 			-> ¬(¬p) ∨ ¬q
 			-> p ∨ ¬q
 
@@ -447,17 +447,16 @@ then we must go on to the next Herbrand set.
 			else let letter = car(letters)
 			in and(is-wff-false(subs(wff, letter, T), cdr(letters)),
 				   is-wff-false(subs(wff, letter, F), cdr(letters)))
-
-			where is-wff-false(wff) =
-					not(and((apply 'or car(wff)),
-						is-wff-false(cdr(wff))))
-			and subs(wff, letter, value) = 
-					if atom(wff)
-					then if wff = letter
-						 then value
-						 else wff
-					else cons(subs(car(wff),letter,value),
-							  subs(cdr(wff),letter,value))
+		where is-wff-false(wff) =
+				not(and((apply or car(wff)),
+					is-wff-false(cdr(wff))))
+		and subs(wff, letter, value) = 
+				if atom(wff)
+				then if wff = letter
+					 then value
+					 else wff
+				else cons(subs(car(wff),letter,value),
+						  subs(cdr(wff),letter,value))
 
 
 

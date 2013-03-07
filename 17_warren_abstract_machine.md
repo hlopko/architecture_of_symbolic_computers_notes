@@ -29,7 +29,7 @@ For each of original Prolog statements there is a corresponding section of WAM
 instructions which handles the head unification for that clause and the
 sequencing through goals called our on the statement's right hand side.
 
-![Simplified Prolog-to-WAM translation](17_02_translation.jpg)
+![Simplified Prolog-to-WAM translation](figures/17_02_translation.jpg)
 
 All such code sections for clauses aving the same predicate name in their head
 literal are chained directly together in the order in which the programmer
@@ -404,8 +404,6 @@ a cellhas been assigned, and the ***mode flag*** is set to ***write mode***.
 
 #### Variable Get Instructions ####
 
-![Sample sequence of getv instructions](figures/17_14_sample_getv_sequence.jpg)
-
 The ***getv*** instruction handles the case where the formal argument is
 a clause variable. This is complex because the compiler cannot always know
 beforehand whether or not this clause variable might have a value at
@@ -633,6 +631,8 @@ that have side effects, such sa cut, I/O, ad the various predicates to read and
 modify the program dynamically.
 
 ### Some Simple New Instructions ###
+
+![New WAM instructions to support built-ins](figures/17_19_builtin_instructions.jpg)
 
 ***Fail*** invoked the failure sequence.
 
