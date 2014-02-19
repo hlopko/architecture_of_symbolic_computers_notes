@@ -1,7 +1,5 @@
 # Lambda Calculus #
 
-*in code examples symbols `λ` represent λ*
-
 Lambda calculus is a mathematical language for describing arbitrary
 *expressions* built from the application of functions to other expressions.
 It is as powerful as any other notations for describing algorithms, including
