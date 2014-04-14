@@ -1,4 +1,4 @@
-# Lambda Calculus #
+# Lambda Calculus
 
 Lambda calculus is a mathematical language for describing arbitrary
 *expressions* built from the application of functions to other expressions.
@@ -14,21 +14,25 @@ the function's body. **Currying** is the normal mode of execution.
 * names given to things are the formal parameters of a function
 * lexical scoping
 
-## Syntax ##
+## Syntax
 
+{{{
 	<identifier>  := a|b|c|d|e ...
 	<function>    := ( λ<identifier>"|"<expression>)
 	<application> := (<expression><expression>)
 	<expression>  := <identifier> | <function> | <application>
+}}}
 
 Examples:
 
+{{{
 	identifier:  a
 	application: ((λx|(yx))a)
 	function:    (λx|(yx))
+}}}
 
 
-## General Model Of Computation ##
+## General Model Of Computation
 
 In λ - Calculus, what an expression means is equivalent to what it can
 reduce to after all function applications have been performed.

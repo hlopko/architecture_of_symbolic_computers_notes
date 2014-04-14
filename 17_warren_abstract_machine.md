@@ -19,7 +19,7 @@ goal on the right hand side. A linking mechanism keeps track of which literals
 are left to be treated as goals, and in what order, after the current goal is
 proven successfully. Saving copies of the argument and other registers in
 a memory stack permits failure and backtracking operations to restart with
-a previous goal as required. 
+a previous goal as required.
 
 ![Prolog execution using the WAM model](figures/17_01_prolog_execution.jpg)
 
@@ -42,7 +42,7 @@ specifically to handle any goal whose predicate symbol matches that for its
 internal clauses. The internals of the precedure step through the appropriate
 statements in the expected Prolog order, with calls to other such prcedures as
 needed as goals are processed. All such calls are to the entry code of
-a procedure segment where the neccessary initialization is performed. 
+a procedure segment where the neccessary initialization is performed.
 
 ### Code for One Clause ###
 
@@ -86,7 +86,7 @@ current code, plus initialization for the new predicate's clauses.
 
 Successful execution of the new code for some goal will eventually result in
 control being passed back to the original code that called it, with the
-original machine state largely restored. 
+original machine state largely restored.
 
 A failure in the called code to find any matching clauses at all will cause
 a ***backtrack*** into the caller's code to look for another alternative for
@@ -95,7 +95,7 @@ a prior goal. This is called a ***deep backtrack***.
 Successful completion of the code segment for the last goal in a clause causes
 return to the section's exit. This code does whatever storage housekeeping is
 necessary before returning to the code that called the procedure in which this
-section is embedded. 
+section is embedded.
 
 The primary difference between conventional subroutine call and WAM execution
 sequence is that a return in the WAM does not free up the stack space allocated
@@ -104,7 +104,7 @@ restarting the procedure later if a failure is detected in some other clause.
 
 ## Major Data Structures and State Registers ##
 
-The WAM model matcher fairly directly a conventional von Neumann computer. 
+The WAM model matcher fairly directly a conventional von Neumann computer.
 
 ![Major memory areas for the simplified WAM](figures/17_04_memory.jpg)
 
@@ -133,22 +133,22 @@ to the clauses. The information for each attempt to solve a goal is called
 created one and the ***E register*** (environment) pointing to the one created
 when the clause code currently pointed to by the PC was entered. The ***S
 register*** points to the current stack top from which new choice points will
-be built. 
+be built.
 
 At any point in time the PC points into the code for some clause, and
 E register gives access to the current values for variables in that clause. The
 B register points to the most recently created choice point and may be equal to
 or greather than E. It is equal just as the code for the right-hand side is
-entered and is greather as goals in that clause's body are solved successully. 
+entered and is greather as goals in that clause's body are solved successully.
 
 The ***trail*** is a stack of locations containing references to variables that
 have received values at some point during execution (e.g. are ***bound*** or
 ***instantiated***), and may have to be *unbound*. ***TR register*** points to
-the top of this area where new trails can be pushed. 
+the top of this area where new trails can be pushed.
 
 ***PDL*** or ***push-down list*** is a small stack used by the unification
 instructions to save information during unification of complex objects. ***PDL
-register*** points to the top of this stack. 
+register*** points to the top of this stack.
 
 ## Memory Word Format ##
 
@@ -206,7 +206,7 @@ Information found includes:
   built, namely, the top of the trail and heap, and the choice point if effect
   before this one (***BTR (backtrack trail), BH (backtrack heap), BB (backtrack
   B)***). This is primary information for ***deep backtrack*** if no clause
-  exists which satisfies the current goal. 
+  exists which satisfies the current goal.
 * The ***environment*** for the values to be bound to local variables.
 
 The notation `<entry-name>[X]` refers to the contents of a specific entry in
@@ -258,7 +258,7 @@ different clauses that have the same predicate symbol in their head.
 
 The ***mark*** instruction is the first instruction encountered in the
 procedure. It builds a choice point. After execution, the B register is set to
-point to the new choice point. 
+point to the new choice point.
 
 The ***retry-me-else*** is the first instruction for each clause code section.
 It modifies the FA entry in B's choice point to indicate the start of the code
@@ -324,7 +324,7 @@ environments. Unlike conventional computers, this return does not pop anything.
 actual arguments (found in A registers) and the formal arguments in the head of
 a potentially applicable clause. They are used right after an ***allocate*** in
 the code section for that clause. At this point both B and E point to the same
-location in the same choice point. 
+location in the same choice point.
 
 There is typically one get per formal argument. The form of the get depends on
 the type of the formal argument.
@@ -344,7 +344,7 @@ stack*** the address of the variable being bound. To trail a variable, we
 simply push a copy of its memory cell to the trail stack.
 
 The failure of a get instruction to find a match between its argument and the
-corresponding A register causes a ***shalow backtrack***. 
+corresponding A register causes a ***shalow backtrack***.
 
 #### Explicit Get Instructions ####
 
@@ -361,7 +361,7 @@ a tag of ***constant***, then the value fields are compared. A match means that
 the unification is successful, and execution continues. A mismatch means that
 the actual and formal arguments are not unifiable and this clause cannot be
 used for the current goal. The failure sequence described above is then invoked
-to start up the code for some other potential clause. 
+to start up the code for some other potential clause.
 
 If the result of the dereference has a tag of ***variable***, then that
 variable is trailed and a copy of the constant is stored into the variable's
@@ -393,7 +393,7 @@ A match means that the actual and formal arguments have at least the same
 function symbol and the same number of arguments. Following unify instructions
 will check the components for matches. This is signalled by setting ***mode
 flag*** to ***read mode*** and SP to point to one memory cell beyond the actual
-argument's ***structure*** cell. 
+argument's ***structure*** cell.
 
 An actual argument that is an unbound variable causes that variable to be
 trailed and the corresponding cell overwritten by a tag of ***structure
@@ -407,7 +407,7 @@ a cellhas been assigned, and the ***mode flag*** is set to ***write mode***.
 The ***getv*** instruction handles the case where the formal argument is
 a clause variable. This is complex because the compiler cannot always know
 beforehand whether or not this clause variable might have a value at
-a particular point, or even what kind of value that might be. 
+a particular point, or even what kind of value that might be.
 
 As an example consider the case where the clause head is `p(x,x)` generating
 code:
@@ -498,7 +498,7 @@ handling such situations exist:
 
 There are two major sections to this compiler. First an outer loop that cycles
 through the clauses and chains them into procedures. Second is the compilation
-of a single clause into a code section for the above procedure chains. 
+of a single clause into a code section for the above procedure chains.
 
 ### Procedure-Level Compilation ###
 
@@ -622,7 +622,7 @@ namely, inside out versus outside in. they do, however, use the same ide of
 temporarily saving a partially processed object in an extra clause variable
 until it is needed. Note also that one of the final steps in the outer loop
 uses information from the symbol table to fix up all the labels for the call
-instructions to point to the correct procedure entry points. 
+instructions to point to the correct procedure entry points.
 
 ## Supporting Built-ins ##
 
@@ -652,7 +652,7 @@ To understand ***cut*** consider a clause of the form:
 
 When converted into WAM cde, the code to support the cut operation should come
 immediately after the call qn instruction. Following this code should then be
-the normal puts in support of r1. 
+the normal puts in support of r1.
 
 If the program execution ever reaches the cut code, B points to the most recent
 choice point build in support of qn, while E points to the earlier one
@@ -660,7 +660,7 @@ established for p. The semantics of a cut dictate that any backtracks through
 it will always succeed, but will have the effect that any backtracks through it
 should result in a backtrack through the p choice point. It should be as if the
 choice points for q1 to qn never existed, and that this clause is the last one
-possible for the p predicate. 
+possible for the p predicate.
 
 One way to do this is to have the cut code set B to poin to the same choice
 point as E does, and to load FA[E] with the address of some location known to
@@ -674,7 +674,7 @@ in turn will restart the prior choice point as desired.
 
 ***Disjunction*** `;` is worth discussion. What it does is build a separate
 choice point for the goals involved that will try the second if the first does
-not succeed, and so on. 
+not succeed, and so on.
 
 ### Tough Predicates ###
 
@@ -695,7 +695,7 @@ a retry-me-else which designated append2 as the starting location for the next
 possible rule for append and allocates space for the single clause variable x.
 The body of the clause code consists of checking that the first argument is
 nil, and then that the second and third arguments are the same. The final
-instruction, return, returns control to the caller if this all worked. 
+instruction, return, returns control to the caller if this all worked.
 
 The second clause is a little more complex. Here the first argument is
 supposed to be a list, so the unification code for the first argument starts
@@ -704,7 +704,7 @@ car cell, and set the machine to rad mode. The following two unifyv
 instructions then try to unify the car of the actual list with H, and the cdr
 with L1. Both of these have no current value, so the net effect is a copying of
 the car and cdr of the actual list into these two variable locations in th
-environment. 
+environment.
 
 If the actual argument in A1 is an unbound variable to begin with, a copy of
 the variable's cell is pushed to the trail, the cell itself is loaded with
@@ -718,7 +718,7 @@ the other two arguments.
 
 Following this code, three putvs create the new argument values needed to call
 append from the body. Note that copies of the original A registers are in the
-choice point where they get reloaded if a backtrack occurs. 
+choice point where they get reloaded if a backtrack occurs.
 
 The recursive call to append repeats this whole process over again with the new
 arguments.
@@ -728,7 +728,7 @@ successfully return from either code sequence.
 
 The final instruction is a backtrack, and is positioned as a new clause if the
 second one fails. This signals that there are no more rules for this goan and
-deep backtrack must occur. 
+deep backtrack must occur.
 
 ## Problems ##
 
@@ -737,7 +737,7 @@ deep backtrack must occur.
    1. member(x,y) [use z in place of the anonymous variable]
 
 			#set membership
-			member(x,(x._)). 
+			member(x,(x._)).
 			member(x,(_.y)) :- member(x,y)
 
 		Solution:
@@ -767,7 +767,7 @@ deep backtrack must occur.
    2. reverse(x,y)
 
 			#second argument is reversed list
-			reverse(x,y) :- rev(x,(),y). 
+			reverse(x,y) :- rev(x,(),y).
 			rev(nil,y,y).
 			rev((h.t),y,z) :- rev(t,(h.y),z)
 
